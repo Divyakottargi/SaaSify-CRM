@@ -1,0 +1,416 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+}
+
+/* Login */
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-card {
+    width: 380px;
+    background: white;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.login-card h1 {
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #555;
+}
+
+.login-card input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.login-card button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.login-card button:hover {
+    background: #1d4ed8;
+}
+
+.message {
+    text-align: center;
+    margin-top: 15px;
+    color: #dc2626;
+}
+
+/* Dashboard */
+
+.dashboard-layout {
+    min-height: 100vh;
+    display: flex;
+}
+
+/* Sidebar */
+
+.sidebar {
+    width: 230px;
+    background: #111827;
+    color: white;
+    padding: 25px 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h2 {
+    margin: 0 0 30px 10px;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-item {
+    background: transparent;
+    color: #d1d5db;
+    border: none;
+    padding: 12px;
+    text-align: left;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background: #2563eb;
+    color: white;
+}
+
+.logout-button {
+    margin-top: auto;
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    background: #b91c1c;
+}
+
+/* Main */
+
+.dashboard-main {
+    flex: 1;
+    padding: 30px;
+}
+
+/* Header */
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+}
+
+.dashboard-header p {
+    color: #6b7280;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.user-info span {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* Summary cards */
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.summary-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.summary-card h3 {
+    margin-top: 0;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.summary-card p {
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+/* Activity */
+
+.activity-card {
+    background: white;
+    margin-top: 30px;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.activity-card h2 {
+    margin-top: 0;
+}
+
+.activity-card p {
+    color: #6b7280;
+}
+
+/* Mobile */
+
+@media (max-width: 800px) {
+
+    .sidebar {
+        width: 180px;
+    }
+
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+
+    .dashboard-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .sidebar nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .logout-button {
+        margin-top: 20px;
+    }
+
+    .dashboard-main {
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .user-info {
+        text-align: left;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* Leads page */
+
+.leads-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.leads-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.leads-header h2 {
+    margin: 0;
+}
+
+.add-button {
+    width: auto;
+    padding: 12px 20px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.add-button:hover {
+    background: #1d4ed8;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+    background: #f9fafb;
+    color: #374151;
+    font-size: 14px;
+}
+
+td {
+    color: #4b5563;
+}
+
+.status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.status.new {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.status.contacted {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status.qualified {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.empty-message {
+    color: #6b7280;
+}
+/* Add Lead Form */
+
+.lead-form-card {
+    background: white;
+    padding: 25px;
+    margin-bottom: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.lead-form-card h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.lead-form-card form {
+    display: grid;
+    gap: 15px;
+}
+
+.lead-form-card input,
+.lead-form-card select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.save-button,
+.cancel-button {
+    width: auto;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.save-button {
+    background: #2563eb;
+    color: white;
+}
+
+.save-button:hover {
+    background: #1d4ed8;
+}
+
+.cancel-button {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.cancel-button:hover {
+    background: #d1d5db;
+}
+.delete-button {
+    padding: 7px 12px;
+    border: none;
+    border-radius: 5px;
+    background: #dc2626;
+    color: white;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background: #b91c1c;
+}
