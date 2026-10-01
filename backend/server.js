@@ -68,6 +68,12 @@ app.get(
 
 // Start server
 const PORT = process.env.PORT || 5000;
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "SaaSify CRM Backend is running"
+  });
+});
 
 app.listen(PORT, () => {
     console.log(`SaaSify CRM backend running on http://localhost:${PORT}`);
