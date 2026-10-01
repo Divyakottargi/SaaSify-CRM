@@ -2,7 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert");
 
 test("SaaSify CRM API basic test", async () => {
-    const response = await fetch("http://localhost:5000/api/health");
+    const response = await fetch("http://localhost:10000/api/health");
 
     assert.strictEqual(response.status, 200);
 
