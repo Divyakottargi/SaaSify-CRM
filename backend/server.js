@@ -65,16 +65,18 @@ app.get(
         });
     }
 );
-
-// Start server
-const PORT = process.env.PORT || 5000;
+// Root route
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "SaaSify CRM Backend is running"
+    message: "SaaSify CRM Backend is running",
+    status: "online"
   });
 });
 
-app.listen(PORT, () => {
-    console.log(`SaaSify CRM backend running on http://localhost:${PORT}`);
+// Start server
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`SaaSify CRM backend running on port ${PORT}`);
 });
