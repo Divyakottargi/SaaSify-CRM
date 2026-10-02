@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./index.css";
+import Kanban from "./Kanban";
 
 function App() {
     const [email, setEmail] = useState("");
@@ -19,6 +20,8 @@ function App() {
     const [leadCompany, setLeadCompany] = useState("");
     const [leadStatus, setLeadStatus] = useState("new");
 
+    const API_URL = "http://localhost:10000";
+
     // Load logged-in user
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -30,7 +33,7 @@ function App() {
         const loadUser = async () => {
             try {
                 const response = await fetch(
-                    "http://localhost:5000/api/profile",
+                    `${API_URL}/api/profile`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`
@@ -59,7 +62,7 @@ function App() {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/leads/count",
+                `${API_URL}/api/leads/count`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -83,7 +86,7 @@ function App() {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/leads",
+                `${API_URL}/api/leads`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -117,7 +120,7 @@ function App() {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/auth/login",
+                `${API_URL}/api/auth/login`,
                 {
                     method: "POST",
                     headers: {
@@ -152,7 +155,7 @@ function App() {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/leads",
+                `${API_URL}/api/leads`,
                 {
                     method: "POST",
                     headers: {
@@ -206,7 +209,7 @@ function App() {
 
         try {
             const response = await fetch(
-                `http://localhost:5000/api/leads/${leadId}`,
+                `${API_URL}/api/leads/${leadId}`,
                 {
                     method: "DELETE",
                     headers: {
@@ -234,7 +237,7 @@ function App() {
     const handleLogout = async () => {
         try {
             await fetch(
-                "http://localhost:5000/api/auth/logout",
+                `${API_URL}/api/auth/logout`,
                 {
                     method: "POST"
                 }
@@ -335,15 +338,34 @@ function App() {
                         Leads
                     </button>
 
-                    <button className="nav-item">
+                    <button
+                        className="nav-item"
+                        onClick={() =>
+                            setCurrentPage("contacts")
+                        }
+                    >
                         Contacts
                     </button>
 
-                    <button className="nav-item">
+                    <button
+                        className={`nav-item ${
+                            currentPage === "deals"
+                                ? "active"
+                                : ""
+                        }`}
+                        onClick={() =>
+                            setCurrentPage("deals")
+                        }
+                    >
                         Deals
                     </button>
 
-                    <button className="nav-item">
+                    <button
+                        className="nav-item"
+                        onClick={() =>
+                            setCurrentPage("activities")
+                        }
+                    >
                         Activities
                     </button>
 
@@ -441,7 +463,6 @@ function App() {
 
                         </header>
 
-                        {/* Add Lead Form */}
                         {showLeadForm && (
                             <section className="lead-form-card">
 
@@ -545,7 +566,6 @@ function App() {
                             </section>
                         )}
 
-                        {/* Leads Table */}
                         <section className="leads-card">
 
                             <div className="leads-header">
@@ -634,6 +654,39 @@ function App() {
                             {message}
                         </p>
 
+                    </>
+                )}
+
+                {/* Deals / Kanban */}
+                {currentPage === "deals" && (
+                    <Kanban />
+                )}
+
+                {/* Contacts */}
+                {currentPage === "contacts" && (
+                    <>
+                        <header className="dashboard-header">
+                            <div>
+                                <h1>Contacts</h1>
+                                <p>
+                                    Contact management will be added next.
+                                </p>
+                            </div>
+                        </header>
+                    </>
+                )}
+
+                {/* Activities */}
+                {currentPage === "activities" && (
+                    <>
+                        <header className="dashboard-header">
+                            <div>
+                                <h1>Activities</h1>
+                                <p>
+                                    Email activity timeline will be added later.
+                                </p>
+                            </div>
+                        </header>
                     </>
                 )}
 

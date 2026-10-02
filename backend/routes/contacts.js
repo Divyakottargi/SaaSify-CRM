@@ -4,7 +4,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// CREATE LEAD
+// CREATE CONTACT
 router.post("/", authMiddleware, async (req, res) => {
     try {
         const workspaceId = req.user.workspaceId;
@@ -13,43 +13,41 @@ router.post("/", authMiddleware, async (req, res) => {
             name,
             email,
             phone,
-            company,
-            status
+            company
         } = req.body;
 
         if (!name) {
             return res.status(400).json({
                 success: false,
-                message: "Lead name is required"
+                message: "Contact name is required"
             });
         }
 
         const result = await db.query(
-            `INSERT INTO leads
-            (workspace_id, name, email, phone, company, status)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            `INSERT INTO contacts
+            (workspace_id, name, email, phone, company)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING
                 id,
                 name,
                 email,
                 phone,
                 company,
-                status,
-                created_at`,
+                created_at,
+                updated_at`,
             [
                 workspaceId,
                 name,
                 email || null,
                 phone || null,
-                company || null,
-                status || "new"
+                company || null
             ]
         );
 
         res.status(201).json({
             success: true,
-            message: "Lead created successfully",
-            lead: result.rows[0]
+            message: "Contact created successfully",
+            contact: result.rows[0]
         });
 
     } catch (error) {
@@ -57,13 +55,13 @@ router.post("/", authMiddleware, async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Unable to create lead"
+            message: "Unable to create contact"
         });
     }
 });
 
 
-// GET ALL LEADS
+// GET ALL CONTACTS
 router.get("/", authMiddleware, async (req, res) => {
     try {
         const workspaceId = req.user.workspaceId;
@@ -75,9 +73,9 @@ router.get("/", authMiddleware, async (req, res) => {
                 email,
                 phone,
                 company,
-                status,
-                created_at
-             FROM leads
+                created_at,
+                updated_at
+             FROM contacts
              WHERE workspace_id = $1
              AND deleted_at IS NULL
              ORDER BY created_at DESC`,
@@ -86,7 +84,7 @@ router.get("/", authMiddleware, async (req, res) => {
 
         res.json({
             success: true,
-            leads: result.rows
+            contacts: result.rows
         });
 
     } catch (error) {
@@ -94,46 +92,17 @@ router.get("/", authMiddleware, async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Unable to fetch leads"
+            message: "Unable to fetch contacts"
         });
     }
 });
 
 
-// GET TOTAL LEADS
-router.get("/count", authMiddleware, async (req, res) => {
-    try {
-        const workspaceId = req.user.workspaceId;
-
-        const result = await db.query(
-            `SELECT COUNT(*) AS total
-             FROM leads
-             WHERE workspace_id = $1
-             AND deleted_at IS NULL`,
-            [workspaceId]
-        );
-
-        res.json({
-            success: true,
-            totalLeads: Number(result.rows[0].total)
-        });
-
-    } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Unable to fetch lead count"
-        });
-    }
-});
-
-
-// GET ONE LEAD
+// GET ONE CONTACT
 router.get("/:id", authMiddleware, async (req, res) => {
     try {
         const workspaceId = req.user.workspaceId;
-        const leadId = req.params.id;
+        const contactId = req.params.id;
 
         const result = await db.query(
             `SELECT
@@ -142,26 +111,25 @@ router.get("/:id", authMiddleware, async (req, res) => {
                 email,
                 phone,
                 company,
-                status,
                 created_at,
                 updated_at
-             FROM leads
+             FROM contacts
              WHERE id = $1
              AND workspace_id = $2
              AND deleted_at IS NULL`,
-            [leadId, workspaceId]
+            [contactId, workspaceId]
         );
 
         if (result.rows.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: "Lead not found"
+                message: "Contact not found"
             });
         }
 
         res.json({
             success: true,
-            lead: result.rows[0]
+            contact: result.rows[0]
         });
 
     } catch (error) {
@@ -169,44 +137,42 @@ router.get("/:id", authMiddleware, async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Unable to fetch lead"
+            message: "Unable to fetch contact"
         });
     }
 });
 
 
-// UPDATE LEAD
+// UPDATE CONTACT
 router.put("/:id", authMiddleware, async (req, res) => {
     try {
         const workspaceId = req.user.workspaceId;
-        const leadId = req.params.id;
+        const contactId = req.params.id;
 
         const {
             name,
             email,
             phone,
-            company,
-            status
+            company
         } = req.body;
 
         if (!name) {
             return res.status(400).json({
                 success: false,
-                message: "Lead name is required"
+                message: "Contact name is required"
             });
         }
 
         const result = await db.query(
-            `UPDATE leads
+            `UPDATE contacts
              SET
                 name = $1,
                 email = $2,
                 phone = $3,
                 company = $4,
-                status = $5,
                 updated_at = CURRENT_TIMESTAMP
-             WHERE id = $6
-             AND workspace_id = $7
+             WHERE id = $5
+             AND workspace_id = $6
              AND deleted_at IS NULL
              RETURNING
                 id,
@@ -214,7 +180,6 @@ router.put("/:id", authMiddleware, async (req, res) => {
                 email,
                 phone,
                 company,
-                status,
                 created_at,
                 updated_at`,
             [
@@ -222,8 +187,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
                 email || null,
                 phone || null,
                 company || null,
-                status || "new",
-                leadId,
+                contactId,
                 workspaceId
             ]
         );
@@ -231,14 +195,14 @@ router.put("/:id", authMiddleware, async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: "Lead not found"
+                message: "Contact not found"
             });
         }
 
         res.json({
             success: true,
-            message: "Lead updated successfully",
-            lead: result.rows[0]
+            message: "Contact updated successfully",
+            contact: result.rows[0]
         });
 
     } catch (error) {
@@ -246,20 +210,20 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Unable to update lead"
+            message: "Unable to update contact"
         });
     }
 });
 
 
-// DELETE LEAD - SOFT DELETE
+// DELETE CONTACT - SOFT DELETE
 router.delete("/:id", authMiddleware, async (req, res) => {
     try {
         const workspaceId = req.user.workspaceId;
-        const leadId = req.params.id;
+        const contactId = req.params.id;
 
         const result = await db.query(
-            `UPDATE leads
+            `UPDATE contacts
              SET
                 deleted_at = CURRENT_TIMESTAMP,
                 updated_at = CURRENT_TIMESTAMP
@@ -267,19 +231,19 @@ router.delete("/:id", authMiddleware, async (req, res) => {
              AND workspace_id = $2
              AND deleted_at IS NULL
              RETURNING id`,
-            [leadId, workspaceId]
+            [contactId, workspaceId]
         );
 
         if (result.rows.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: "Lead not found"
+                message: "Contact not found"
             });
         }
 
         res.json({
             success: true,
-            message: "Lead deleted successfully"
+            message: "Contact deleted successfully"
         });
 
     } catch (error) {
@@ -287,8 +251,10 @@ router.delete("/:id", authMiddleware, async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Unable to delete lead"
+            message: "Unable to delete contact"
         });
     }
 });
- module.exports = router;
+
+
+module.exports = router;

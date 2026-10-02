@@ -5,6 +5,9 @@ require("dotenv").config();
 const db = require("./db");
 const authRoutes = require("./routes/auth");
 const leadsRoutes = require("./routes/leads");
+const contactsRoutes = require("./routes/contacts");
+const dealsRoutes = require("./routes/deals");
+const dealStagesRoutes = require("./routes/dealStages");
 const authMiddleware = require("./middleware/authMiddleware");
 const roleMiddleware = require("./middleware/roleMiddleware");
 
@@ -43,6 +46,12 @@ app.get("/api/db-test", async (req, res) => {
 app.use("/api/auth", authRoutes);
 // Leads routes
 app.use("/api/leads", leadsRoutes);
+//contact routes
+app.use("/api/contacts", contactsRoutes);
+//deals routes
+app.use("/api/deals", dealsRoutes);
+//dealstages
+app.use("/api/deal-stages", dealStagesRoutes);
 
 // Protected profile route
 app.get("/api/profile", authMiddleware, (req, res) => {
