@@ -8,6 +8,8 @@ const leadsRoutes = require("./routes/leads");
 const contactsRoutes = require("./routes/contacts");
 const dealsRoutes = require("./routes/deals");
 const dealStagesRoutes = require("./routes/dealStages");
+const activitiesRoutes = require("./routes/activities");
+const emailsRoutes = require("./routes/emails");
 const authMiddleware = require("./middleware/authMiddleware");
 const roleMiddleware = require("./middleware/roleMiddleware");
 
@@ -52,6 +54,10 @@ app.use("/api/contacts", contactsRoutes);
 app.use("/api/deals", dealsRoutes);
 //dealstages
 app.use("/api/deal-stages", dealStagesRoutes);
+//activitesroutes
+app.use("/api/activities", activitiesRoutes);
+//email routes
+app.use("/api/emails", emailsRoutes);
 
 // Protected profile route
 app.get("/api/profile", authMiddleware, (req, res) => {
@@ -86,6 +92,10 @@ app.get("/", (req, res) => {
 // Start server
 const PORT = process.env.PORT || 10000;
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`SaaSify CRM backend running on port ${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+module.exports = app;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./index.css";
 import Kanban from "./Kanban";
+import Activities from "./Activities";
 
 function App() {
     const [email, setEmail] = useState("");
@@ -661,6 +662,7 @@ function App() {
                 {currentPage === "deals" && (
                     <Kanban />
                 )}
+                {currentPage === "activities" && <Activities />}
 
                 {/* Contacts */}
                 {currentPage === "contacts" && (
@@ -675,20 +677,10 @@ function App() {
                         </header>
                     </>
                 )}
-
-                {/* Activities */}
+                 {/* Activities */}
                 {currentPage === "activities" && (
-                    <>
-                        <header className="dashboard-header">
-                            <div>
-                                <h1>Activities</h1>
-                                <p>
-                                    Email activity timeline will be added later.
-                                </p>
-                            </div>
-                        </header>
-                    </>
-                )}
+             <Activities />
+            )}
 
             </main>
         </div>
