@@ -2,126 +2,143 @@ const express = require("express");
 const db = require("../db");
 const authMiddleware = require("../middleware/authMiddleware");
 const { sendEmail } = require("../services/emailService");
+const { body, validationResult } = require("express-validator");
 
 const router = express.Router();
 
-/*
-    POST /api/emails/send
+router.post(
+    "/send",
+    authMiddleware,
+    [
+        body("to")
+            .trim()
+            .isEmail()
+            .withMessage("Please provide a valid recipient email")
+            .normalizeEmail(),
 
-    Sends an email through Mailtrap
-    and saves it as an activity.
-*/
-router.post("/send", authMiddleware, async (req, res) => {
-    try {
-        const workspaceId = req.user.workspaceId;
-        const userId = req.user.userId;
+        body("subject")
+            .trim()
+            .notEmpty()
+            .withMessage("Email subject is required")
+            .isLength({ max: 200 })
+            .withMessage("Email subject is too long"),
 
-        const {
-            to,
-            subject,
-            text,
-            contactId,
-            dealId
-        } = req.body;
+        body("text")
+            .trim()
+            .notEmpty()
+            .withMessage("Email message is required")
+            .isLength({ max: 5000 })
+            .withMessage("Email message is too long")
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
 
-        // Basic validation
-        if (!to || !subject || !text) {
+        if (!errors.isEmpty()) {
             return res.status(400).json({
                 success: false,
-                message: "To, subject and message are required"
+                message: "Validation failed",
+                errors: errors.array()
             });
         }
 
-        // Check contact belongs to workspace
-        if (contactId) {
-            const contactCheck = await db.query(
-                `SELECT id
-                 FROM contacts
-                 WHERE id = $1
-                 AND workspace_id = $2
-                 AND deleted_at IS NULL`,
-                [contactId, workspaceId]
-            );
+        try {
+            const workspaceId = req.user.workspaceId;
+            const userId = req.user.userId;
 
-            if (contactCheck.rows.length === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Contact not found"
-                });
-            }
-        }
-
-        // Check deal belongs to workspace
-        if (dealId) {
-            const dealCheck = await db.query(
-                `SELECT id
-                 FROM deals
-                 WHERE id = $1
-                 AND workspace_id = $2
-                 AND deleted_at IS NULL`,
-                [dealId, workspaceId]
-            );
-
-            if (dealCheck.rows.length === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Deal not found"
-                });
-            }
-        }
-
-        // Send email through Mailtrap
-        const emailInfo = await sendEmail({
-            to,
-            subject,
-            text
-        });
-
-        // Save email as an activity
-        const activityResult = await db.query(
-            `INSERT INTO activities
-                (
-                    workspace_id,
-                    user_id,
-                    contact_id,
-                    deal_id,
-                    type,
-                    subject,
-                    description
-                )
-             VALUES ($1, $2, $3, $4, $5, $6, $7)
-             RETURNING *`,
-            [
-                workspaceId,
-                userId,
-                contactId || null,
-                dealId || null,
-                "email",
+            const {
+                to,
                 subject,
-                `Email sent to ${to}. Message: ${text}`
-            ]
-        );
+                text,
+                contactId,
+                dealId
+            } = req.body;
 
-        res.status(201).json({
-            success: true,
-            message: "Email sent and activity recorded successfully",
-            email: {
-                messageId: emailInfo.messageId,
-                to: to,
-                subject: subject
-            },
-            activity: activityResult.rows[0]
-        });
+            if (contactId) {
+                const contactCheck = await db.query(
+                    `SELECT id
+                     FROM contacts
+                     WHERE id = $1
+                     AND workspace_id = $2
+                     AND deleted_at IS NULL`,
+                    [contactId, workspaceId]
+                );
 
-    } catch (error) {
-        console.error("Send email error:", error);
+                if (contactCheck.rows.length === 0) {
+                    return res.status(404).json({
+                        success: false,
+                        message: "Contact not found"
+                    });
+                }
+            }
 
-        res.status(500).json({
-            success: false,
-            message: "Unable to send email",
-            error: error.message
-        });
+            if (dealId) {
+                const dealCheck = await db.query(
+                    `SELECT id
+                     FROM deals
+                     WHERE id = $1
+                     AND workspace_id = $2
+                     AND deleted_at IS NULL`,
+                    [dealId, workspaceId]
+                );
+
+                if (dealCheck.rows.length === 0) {
+                    return res.status(404).json({
+                        success: false,
+                        message: "Deal not found"
+                    });
+                }
+            }
+
+            const emailInfo = await sendEmail({
+                to,
+                subject,
+                text
+            });
+
+            const activityResult = await db.query(
+                `INSERT INTO activities
+                    (
+                        workspace_id,
+                        user_id,
+                        contact_id,
+                        deal_id,
+                        type,
+                        subject,
+                        description
+                    )
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)
+                 RETURNING *`,
+                [
+                    workspaceId,
+                    userId,
+                    contactId || null,
+                    dealId || null,
+                    "email",
+                    subject,
+                    `Email sent to ${to}. Message: ${text}`
+                ]
+            );
+
+            res.status(201).json({
+                success: true,
+                message: "Email sent and activity recorded successfully",
+                email: {
+                    messageId: emailInfo.messageId,
+                    to,
+                    subject
+                },
+                activity: activityResult.rows[0]
+            });
+
+        } catch (error) {
+            console.error("Send email error:", error);
+
+            res.status(500).json({
+                success: false,
+                message: "Unable to send email"
+            });
+        }
     }
-});
+);
 
 module.exports = router;

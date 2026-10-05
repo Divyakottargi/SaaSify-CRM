@@ -1,66 +1,107 @@
 const express = require("express");
 const db = require("../db");
 const authMiddleware = require("../middleware/authMiddleware");
+const { body, validationResult } = require("express-validator");
 
 const router = express.Router();
 
 // CREATE LEAD
-router.post("/", authMiddleware, async (req, res) => {
-    try {
-        const workspaceId = req.user.workspaceId;
+router.post(
+    "/",
+    authMiddleware,
+    [
+        body("name")
+            .trim()
+            .notEmpty()
+            .withMessage("Lead name is required")
+            .isLength({ max: 100 })
+            .withMessage("Lead name must not exceed 100 characters"),
 
-        const {
-            name,
-            email,
-            phone,
-            company,
-            status
-        } = req.body;
+        body("email")
+            .optional({ values: "falsy" })
+            .trim()
+            .isEmail()
+            .withMessage("Please provide a valid email address")
+            .normalizeEmail(),
 
-        if (!name) {
+        body("phone")
+            .optional({ values: "falsy" })
+            .trim()
+            .isLength({ max: 20 })
+            .withMessage("Phone number is too long"),
+
+        body("company")
+            .optional({ values: "falsy" })
+            .trim()
+            .isLength({ max: 150 })
+            .withMessage("Company name is too long"),
+
+        body("status")
+            .optional({ values: "falsy" })
+            .trim()
+            .isLength({ max: 50 })
+            .withMessage("Status is too long")
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
             return res.status(400).json({
                 success: false,
-                message: "Lead name is required"
+                message: "Validation failed",
+                errors: errors.array()
             });
         }
 
-        const result = await db.query(
-            `INSERT INTO leads
-            (workspace_id, name, email, phone, company, status)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING
-                id,
+        try {
+            const workspaceId = req.user.workspaceId;
+
+            const {
                 name,
                 email,
                 phone,
                 company,
-                status,
-                created_at`,
-            [
-                workspaceId,
-                name,
-                email || null,
-                phone || null,
-                company || null,
-                status || "new"
-            ]
-        );
+                status
+            } = req.body;
 
-        res.status(201).json({
-            success: true,
-            message: "Lead created successfully",
-            lead: result.rows[0]
-        });
+            const result = await db.query(
+                `INSERT INTO leads
+                (workspace_id, name, email, phone, company, status)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING
+                    id,
+                    name,
+                    email,
+                    phone,
+                    company,
+                    status,
+                    created_at`,
+                [
+                    workspaceId,
+                    name,
+                    email || null,
+                    phone || null,
+                    company || null,
+                    status || "new"
+                ]
+            );
 
-    } catch (error) {
-        console.error(error);
+            res.status(201).json({
+                success: true,
+                message: "Lead created successfully",
+                lead: result.rows[0]
+            });
 
-        res.status(500).json({
-            success: false,
-            message: "Unable to create lead"
-        });
+        } catch (error) {
+            console.error(error);
+
+            res.status(500).json({
+                success: false,
+                message: "Unable to create lead"
+            });
+        }
     }
-});
+);
 
 
 // GET ALL LEADS
@@ -176,80 +217,120 @@ router.get("/:id", authMiddleware, async (req, res) => {
 
 
 // UPDATE LEAD
-router.put("/:id", authMiddleware, async (req, res) => {
-    try {
-        const workspaceId = req.user.workspaceId;
-        const leadId = req.params.id;
+router.put(
+    "/:id",
+    authMiddleware,
+    [
+        body("name")
+            .trim()
+            .notEmpty()
+            .withMessage("Lead name is required")
+            .isLength({ max: 100 })
+            .withMessage("Lead name must not exceed 100 characters"),
 
-        const {
-            name,
-            email,
-            phone,
-            company,
-            status
-        } = req.body;
+        body("email")
+            .optional({ values: "falsy" })
+            .trim()
+            .isEmail()
+            .withMessage("Please provide a valid email address")
+            .normalizeEmail(),
 
-        if (!name) {
+        body("phone")
+            .optional({ values: "falsy" })
+            .trim()
+            .isLength({ max: 20 })
+            .withMessage("Phone number is too long"),
+
+        body("company")
+            .optional({ values: "falsy" })
+            .trim()
+            .isLength({ max: 150 })
+            .withMessage("Company name is too long"),
+
+        body("status")
+            .optional({ values: "falsy" })
+            .trim()
+            .isLength({ max: 50 })
+            .withMessage("Status is too long")
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
             return res.status(400).json({
                 success: false,
-                message: "Lead name is required"
+                message: "Validation failed",
+                errors: errors.array()
             });
         }
 
-        const result = await db.query(
-            `UPDATE leads
-             SET
-                name = $1,
-                email = $2,
-                phone = $3,
-                company = $4,
-                status = $5,
-                updated_at = CURRENT_TIMESTAMP
-             WHERE id = $6
-             AND workspace_id = $7
-             AND deleted_at IS NULL
-             RETURNING
-                id,
+        try {
+            const workspaceId = req.user.workspaceId;
+            const leadId = req.params.id;
+
+            const {
                 name,
                 email,
                 phone,
                 company,
-                status,
-                created_at,
-                updated_at`,
-            [
-                name,
-                email || null,
-                phone || null,
-                company || null,
-                status || "new",
-                leadId,
-                workspaceId
-            ]
-        );
+                status
+            } = req.body;
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({
+            const result = await db.query(
+                `UPDATE leads
+                 SET
+                    name = $1,
+                    email = $2,
+                    phone = $3,
+                    company = $4,
+                    status = $5,
+                    updated_at = CURRENT_TIMESTAMP
+                 WHERE id = $6
+                 AND workspace_id = $7
+                 AND deleted_at IS NULL
+                 RETURNING
+                    id,
+                    name,
+                    email,
+                    phone,
+                    company,
+                    status,
+                    created_at,
+                    updated_at`,
+                [
+                    name,
+                    email || null,
+                    phone || null,
+                    company || null,
+                    status || "new",
+                    leadId,
+                    workspaceId
+                ]
+            );
+
+            if (result.rows.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Lead not found"
+                });
+            }
+
+            res.json({
+                success: true,
+                message: "Lead updated successfully",
+                lead: result.rows[0]
+            });
+
+        } catch (error) {
+            console.error(error);
+
+            res.status(500).json({
                 success: false,
-                message: "Lead not found"
+                message: "Unable to update lead"
             });
         }
-
-        res.json({
-            success: true,
-            message: "Lead updated successfully",
-            lead: result.rows[0]
-        });
-
-    } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Unable to update lead"
-        });
     }
-});
+);
 
 
 // DELETE LEAD - SOFT DELETE
@@ -291,4 +372,5 @@ router.delete("/:id", authMiddleware, async (req, res) => {
         });
     }
 });
- module.exports = router;
+
+module.exports = router;

@@ -10,11 +10,24 @@ const dealsRoutes = require("./routes/deals");
 const dealStagesRoutes = require("./routes/dealStages");
 const activitiesRoutes = require("./routes/activities");
 const emailsRoutes = require("./routes/emails");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 const authMiddleware = require("./middleware/authMiddleware");
 const roleMiddleware = require("./middleware/roleMiddleware");
 
 const app = express();
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many requests. Please try again later."
+  }
+});
 
+app.use("/api", apiLimiter);
 app.use(cors());
 app.use(express.json());
 
@@ -58,7 +71,8 @@ app.use("/api/deal-stages", dealStagesRoutes);
 app.use("/api/activities", activitiesRoutes);
 //email routes
 app.use("/api/emails", emailsRoutes);
-
+//helmet
+app.use(helmet());
 // Protected profile route
 app.get("/api/profile", authMiddleware, (req, res) => {
     res.json({
