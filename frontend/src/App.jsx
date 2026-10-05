@@ -21,7 +21,7 @@ function App() {
     const [leadCompany, setLeadCompany] = useState("");
     const [leadStatus, setLeadStatus] = useState("new");
 
-    const API_URL = "http://localhost:10000";
+    const API_URL = import.meta.env.VITE_API_URL;
 
     // Load logged-in user
     useEffect(() => {
